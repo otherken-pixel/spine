@@ -6,8 +6,13 @@ import './index.css';
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/spine/sw.js', { scope: '/spine/' }).catch(() => {
-      // SW registration failure is non-fatal
+    navigator.serviceWorker
+      .register('/spine/sw.js', { scope: '/spine/', updateViaCache: 'none' })
+      .catch(() => {});
+
+    // When a new SW takes over, reload once to pick up fresh assets
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
     });
   });
 }

@@ -18,6 +18,14 @@
     <meta name="mobile-web-app-capable" content="yes" />
 
     <title>Spine</title>
+    <!-- Unregister any SW not scoped to /spine/ (clears stale registrations) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => { if (!r.scope.includes('/spine/')) r.unregister(); });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
