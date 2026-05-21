@@ -48,6 +48,7 @@ export function BookDetail() {
   const books = useBooksStore((s) => s.books);
   const selectBook = useBooksStore((s) => s.selectBook);
   const updateBook = useBooksStore((s) => s.updateBook);
+  const removeBook = useBooksStore((s) => s.removeBook);
 
   const book = books.find((b) => b.id === selectedBookId) ?? null;
 
@@ -238,6 +239,7 @@ export function BookDetail() {
                 book={book}
                 onRatingChange={(r) => updateBook(book.id, { rating: r })}
                 onClose={handleClose}
+                onDelete={() => { removeBook(book.id); handleClose(); }}
               />
             </div>
           </motion.div>
