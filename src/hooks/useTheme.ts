@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useBooksStore } from '../store/useBooksStore';
-import type { ThemeTokens } from '../types';
 
-// Writes theme tokens as CSS custom properties on <html data-theme="...">
 export function useTheme() {
   const activeThemeId = useBooksStore((s) => s.activeThemeId);
   const getActiveTheme = useBooksStore((s) => s.getActiveTheme);
@@ -12,22 +10,22 @@ export function useTheme() {
     const root = document.documentElement;
     root.setAttribute('data-theme', theme.id);
 
-    const tokens = theme.tokens as ThemeTokens;
-    const map: [string, string][] = [
-      ['--room-bg', tokens.roomBg],
-      ['--shelf-color', tokens.shelfColor],
-      ['--shelf-edge', tokens.shelfEdge],
-      ['--ambient-light', tokens.ambientLight],
-      ['--text-primary', tokens.textPrimary],
-      ['--text-secondary', tokens.textSecondary],
-      ['--overlay-bg', tokens.overlayBg],
-      ['--card-bg', tokens.cardBg],
-      ['--accent', tokens.accent],
+    const t = theme.tokens;
+    const vars: [string, string][] = [
+      ['--room-bg',            t.roomBg],
+      ['--shelf-color',        t.shelfColor],
+      ['--shelf-edge',         t.shelfEdge],
+      ['--ambient-light',      t.ambientLight],
+      ['--text-primary',       t.textPrimary],
+      ['--text-secondary',     t.textSecondary],
+      ['--overlay-bg',         t.overlayBg],
+      ['--card-bg',            t.cardBg],
+      ['--accent',             t.accent],
+      ['--blur-intensity',     `${t.blurIntensity}px`],
+      ['--shadow-color',       t.shadowColor],
+      ['--shelf-gradient',     t.shelfGradient],
+      ['--shelf-edge-gradient',t.shelfEdgeGradient],
     ];
-    map.forEach(([prop, val]) => root.style.setProperty(prop, val));
+    vars.forEach(([prop, val]) => root.style.setProperty(prop, val));
   }, [activeThemeId, getActiveTheme]);
-}
-
-export function useGoogleBooks() {
-  return useBooksStore;
 }
