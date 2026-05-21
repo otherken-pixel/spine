@@ -1,10 +1,10 @@
-const SHELL_CACHE = 'spine-shell-v1';
+const SHELL_CACHE = 'spine-shell-v2';
 const DATA_CACHE = 'spine-data-v1';
 
 const SHELL_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  '/spine/',
+  '/spine/index.html',
+  '/spine/manifest.json',
 ];
 
 // Install: pre-cache shell assets
@@ -47,17 +47,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Shell assets: cache-first
+  // Shell assets: network-first so updates are always picked up, fall back to cache
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response.ok && request.method === 'GET') {
           const clone = response.clone();
           caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone));
         }
         return response;
-      });
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });
