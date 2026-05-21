@@ -6,12 +6,10 @@ export interface Book {
   author: string;
   synopsis: string;
   coverUrl: string;
-  /** Hex color for spine rendering, e.g. "#8B4513" */
   spineColor: string;
-  /** Contrasting text color for spine label */
   spineLabelColor: string;
   rating: Rating;
-  dateFinished: string; // ISO date string
+  dateFinished: string;
   pageCount?: number;
   googleBooksId?: string;
 }
@@ -19,24 +17,25 @@ export interface Book {
 export type ThemeId = 'mahogany' | 'minimalist' | 'custom';
 
 export interface ThemeTokens {
-  /** Room/wall background */
+  /* ── Colours ── */
   roomBg: string;
-  /** Shelf surface color */
   shelfColor: string;
-  /** Shelf edge/shadow */
   shelfEdge: string;
-  /** Ambient light tint */
   ambientLight: string;
-  /** Primary text */
   textPrimary: string;
-  /** Secondary text */
   textSecondary: string;
-  /** Overlay backdrop */
   overlayBg: string;
-  /** Card/panel background */
   cardBg: string;
-  /** Accent color */
   accent: string;
+  /* ── Material tokens ── */
+  /** backdrop-filter blur in px */
+  blurIntensity: number;
+  /** rgba cast shadow colour */
+  shadowColor: string;
+  /** CSS gradient for shelf surface */
+  shelfGradient: string;
+  /** CSS gradient for shelf front edge */
+  shelfEdgeGradient: string;
 }
 
 export interface Theme {

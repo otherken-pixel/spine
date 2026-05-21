@@ -12,12 +12,20 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Spine" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Android / Chrome -->
     <meta name="mobile-web-app-capable" content="yes" />
 
     <title>Spine</title>
+    <!-- Unregister any SW not scoped to /spine/ (clears stale registrations) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => { if (!r.scope.includes('/spine/')) r.unregister(); });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

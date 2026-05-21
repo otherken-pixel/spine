@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGoogleBooksSearch } from '../../hooks/useGoogleBooks';
 import { volumeToBook } from '../../utils/googleBooks';
@@ -16,8 +16,8 @@ function LazyCover({ src, alt }: { src: string; alt: string }) {
   const [inView, setInView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Attach observer once
-  const attachObserver = (el: HTMLDivElement | null) => {
+  useEffect(() => {
+    const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -29,12 +29,12 @@ function LazyCover({ src, alt }: { src: string; alt: string }) {
       { rootMargin: '100px' }
     );
     observer.observe(el);
-    (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
-  };
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
-      ref={attachObserver}
+      ref={ref}
       className="w-12 h-16 rounded flex-shrink-0 overflow-hidden"
       style={{ background: 'var(--shelf-color)' }}
     >

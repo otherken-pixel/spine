@@ -1,21 +1,49 @@
+/* Self-hosted fonts — works fully offline */
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/400-italic.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CSS custom property defaults (overridden by useTheme hook) */
+/* ── CSS custom property defaults (overridden live by useTheme) ── */
 :root {
+  /* colours */
   --room-bg: #1a0f0a;
   --shelf-color: #5c2e00;
   --shelf-edge: #2d1400;
-  --ambient-light: rgba(255, 180, 80, 0.08);
+  --ambient-light: rgba(255, 180, 80, 0.10);
   --text-primary: #f5e6d3;
   --text-secondary: #c9a882;
-  --overlay-bg: rgba(15, 7, 3, 0.85);
+  --overlay-bg: rgba(15, 7, 3, 0.82);
   --card-bg: #2a1508;
   --accent: #c97b38;
+  /* material tokens */
+  --blur-intensity: 24px;
+  --shadow-color: rgba(60, 20, 0, 0.55);
+  --shelf-gradient: linear-gradient(
+    180deg,
+    #7a4020 0%,
+    #5c2e00 18%,
+    #4a2500 45%,
+    #5c2e00 65%,
+    #3d1a00 82%,
+    #2a1200 100%
+  );
+  --shelf-edge-gradient: linear-gradient(
+    180deg,
+    #2a1200 0%,
+    #1a0a00 100%
+  );
 }
 
-/* Full-screen app shell */
+/* ── Full-screen app shell ── */
 html, body, #root {
   height: 100%;
   width: 100%;
@@ -28,13 +56,11 @@ body {
   color: var(--text-primary);
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* Prevent iOS bounce */
+  -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
-  /* Safe area insets for notched phones */
   padding-top: env(safe-area-inset-top);
 }
 
-/* Remove default button styles */
 button {
   cursor: pointer;
   border: none;
@@ -44,22 +70,27 @@ button {
   color: inherit;
 }
 
-/* Smooth scrollbar hide for shelf rows */
-.shelf-scroll::-webkit-scrollbar {
-  display: none;
-}
+/* ── Hide scrollbars everywhere in the shelf ── */
+.hide-scroll { scrollbar-width: none; }
+.hide-scroll::-webkit-scrollbar { display: none; }
 
-/* Star rating — golden color */
-button[aria-label*="star"] {
-  color: #f5c842;
-}
+/* ── Star rating ── */
+.star-filled { color: #f5c842; }
+.star-empty  { color: rgba(245,200,66,0.35); }
 
-/* Date input styling on dark backgrounds */
+/* ── Date picker on dark background ── */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.7);
 }
 
-/* Framer Motion layout animation optimization */
+/* ── Prevent iOS tap highlight ── */
 * {
+  -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
+}
+
+/* ── Playfair italics utility ── */
+.font-serif-italic {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
 }
