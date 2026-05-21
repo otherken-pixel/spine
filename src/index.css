@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS custom property defaults (overridden by useTheme hook) */
+:root {
+  --room-bg: #1a0f0a;
+  --shelf-color: #5c2e00;
+  --shelf-edge: #2d1400;
+  --ambient-light: rgba(255, 180, 80, 0.08);
+  --text-primary: #f5e6d3;
+  --text-secondary: #c9a882;
+  --overlay-bg: rgba(15, 7, 3, 0.85);
+  --card-bg: #2a1508;
+  --accent: #c97b38;
+}
+
+/* Full-screen app shell */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--room-bg);
+  color: var(--text-primary);
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Prevent iOS bounce */
+  overscroll-behavior: none;
+  /* Safe area insets for notched phones */
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Remove default button styles */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+/* Smooth scrollbar hide for shelf rows */
+.shelf-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Star rating — golden color */
+button[aria-label*="star"] {
+  color: #f5c842;
+}
+
+/* Date input styling on dark backgrounds */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+
+/* Framer Motion layout animation optimization */
+* {
+  box-sizing: border-box;
+}
