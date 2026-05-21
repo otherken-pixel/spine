@@ -85,17 +85,16 @@ export function BookDetail() {
   return (
     <AnimatePresence>
       {book && (
-        <>
-          {/* ── Glassmorphic backdrop ──────────────────────────────────── */}
-          <motion.div
-            key="backdrop"
-            className="fixed inset-0 z-40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
-            style={{ opacity: backdropOpacity }}
-            onClick={handleClose}
-          >
+        /* ── Glassmorphic backdrop ──────────────────────────────────── */
+        <motion.div
+          key="backdrop"
+          className="fixed inset-0 z-40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }}
+          style={{ opacity: backdropOpacity }}
+          onClick={handleClose}
+        >
             {/* Blurred room behind */}
             <div
               className="absolute inset-0"
@@ -115,9 +114,11 @@ export function BookDetail() {
             />
           </motion.div>
 
-          {/* ── Draggable book + info panel ────────────────────────────── */}
-          <motion.div
-            key="detail"
+      )}
+      {book && (
+        /* ── Draggable book + info panel ────────────────────────────── */
+        <motion.div
+          key="detail"
             className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-hidden"
             style={{
               y,
@@ -280,8 +281,7 @@ export function BookDetail() {
                 onDelete={() => { removeBook(book.id); handleClose(); }}
               />
             </motion.div>
-          </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

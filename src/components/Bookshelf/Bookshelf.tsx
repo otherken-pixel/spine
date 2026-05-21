@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useBooksStore } from '../../store/useBooksStore';
 import { Shelf } from './Shelf';
 
-const BOOKS_PER_SHELF = 4;
+const BOOKS_PER_SHELF = 5;
 
 interface BookshelfProps {
   onOpenTheme: () => void;

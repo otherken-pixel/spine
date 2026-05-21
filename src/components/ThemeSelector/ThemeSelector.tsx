@@ -28,26 +28,24 @@ export function ThemeSelector({ isOpen, onClose }: ThemeSelectorProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            key="ts-backdrop"
-            className="fixed inset-0 z-40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.18 } }}
-            style={{
-              backdropFilter: `blur(${activeTheme.tokens.blurIntensity}px)`,
-              WebkitBackdropFilter: `blur(${activeTheme.tokens.blurIntensity}px)`,
-              background: activeTheme.tokens.overlayBg,
-            }}
-            onClick={onClose}
-          />
-
-          {/* Sheet */}
-          <motion.div
-            key="ts-sheet"
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
+        <motion.div
+          key="ts-backdrop"
+          className="fixed inset-0 z-40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          style={{
+            backdropFilter: `blur(${activeTheme.tokens.blurIntensity}px)`,
+            WebkitBackdropFilter: `blur(${activeTheme.tokens.blurIntensity}px)`,
+            background: activeTheme.tokens.overlayBg,
+          }}
+          onClick={onClose}
+        />
+      )}
+      {isOpen && (
+        <motion.div
+          key="ts-sheet"
+          className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
             style={{
               background: activeTheme.tokens.cardBg,
               boxShadow: `0 -12px 50px var(--shadow-color)`,
@@ -212,7 +210,6 @@ export function ThemeSelector({ isOpen, onClose }: ThemeSelectorProps) {
               </motion.button>
             </div>
           </motion.div>
-        </>
       )}
     </AnimatePresence>
   );

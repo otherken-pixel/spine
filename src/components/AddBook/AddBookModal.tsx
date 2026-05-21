@@ -100,18 +100,20 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          <motion.div
-            className="fixed inset-0 z-40"
-            style={{ background: 'var(--overlay-bg)', backdropFilter: 'blur(6px)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          <motion.div
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
+        <motion.div
+          key="add-backdrop"
+          className="fixed inset-0 z-40"
+          style={{ background: 'var(--overlay-bg)', backdropFilter: 'blur(6px)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleClose}
+        />
+      )}
+      {isOpen && (
+        <motion.div
+          key="add-sheet"
+          className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
             style={{
               background: 'var(--card-bg)',
               boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
@@ -266,7 +268,6 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
               </AnimatePresence>
             </div>
           </motion.div>
-        </>
       )}
     </AnimatePresence>
   );
