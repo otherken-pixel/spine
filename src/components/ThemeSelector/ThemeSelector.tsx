@@ -31,6 +31,7 @@ export function ThemeSelector({ isOpen, onClose }: ThemeSelectorProps) {
         <>
           {/* Backdrop */}
           <motion.div
+            key="ts-backdrop"
             className="fixed inset-0 z-40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -45,6 +46,7 @@ export function ThemeSelector({ isOpen, onClose }: ThemeSelectorProps) {
 
           {/* Sheet */}
           <motion.div
+            key="ts-sheet"
             className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden"
             style={{
               background: activeTheme.tokens.cardBg,
@@ -172,7 +174,6 @@ export function ThemeSelector({ isOpen, onClose }: ThemeSelectorProps) {
 
               {/* ── Live preview swatch ── */}
               <motion.div
-                layout
                 className="rounded-2xl p-4 flex items-center gap-3 mb-5"
                 style={{ background: activeTheme.tokens.roomBg, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08)` }}
               >

@@ -22,7 +22,10 @@
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => { if (!r.scope.includes('/spine/')) r.unregister(); });
+          regs.forEach(r => {
+            if (!r.scope.includes('/spine/')) r.unregister();
+            else if (r.active && !r.active.scriptURL.includes('sw-v2')) r.unregister();
+          });
         });
       }
     </script>
