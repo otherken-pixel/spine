@@ -53,6 +53,8 @@ export function Book({ book, onSelect }: BookProps) {
       animate={controls}
       className="relative cursor-pointer select-none flex-shrink-0"
       style={{ width: `${width}px`, height: `${height}px`, transformOrigin: 'bottom center' }}
+      initial={{ opacity: 0, scale: 0.85 }}
+      exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.15 } }}
       whileHover={{ y: -10, transition: { type: 'spring', stiffness: 380, damping: 22 } }}
       onTap={handleTap}
     >

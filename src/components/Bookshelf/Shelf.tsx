@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion';
 import type { Book as BookType } from '../../types';
 import { Book } from './Book';
 
@@ -28,9 +29,11 @@ export function Shelf({ books, onSelectBook, shelfIndex }: ShelfProps) {
         className="relative hide-scroll flex items-end gap-[2px] px-5 pb-0 overflow-x-auto overflow-y-visible"
         style={{ minHeight: `${170 + topPad}px`, paddingTop: `${topPad}px` }}
       >
-        {books.map((book) => (
-          <Book key={book.id} book={book} onSelect={onSelectBook} />
-        ))}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {books.map((book) => (
+            <Book key={book.id} book={book} onSelect={onSelectBook} />
+          ))}
+        </AnimatePresence>
         {/* Breathing room after last book */}
         <div className="flex-shrink-0 w-4" />
       </div>

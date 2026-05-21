@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useBooksStore } from '../../store/useBooksStore';
 import { Shelf } from './Shelf';
 
@@ -93,16 +93,19 @@ export function Bookshelf({ onOpenTheme, onOpenAdd }: BookshelfProps) {
 
       {/* ── Shelves ── */}
       <main className="relative z-10 pt-6 pb-28">
-        {shelves.map((row, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 24, delay: i * 0.06 }}
-          >
-            <Shelf books={row} onSelectBook={selectBook} shelfIndex={i} />
-          </motion.div>
-        ))}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {shelves.map((row, i) => (
+            <motion.div
+              key={row[0].id}
+              layout
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0, transition: { type: 'spring', stiffness: 200, damping: 24, delay: i * 0.04 } }}
+              exit={{ opacity: 0, y: -16, transition: { duration: 0.2 } }}
+            >
+              <Shelf books={row} onSelectBook={selectBook} shelfIndex={i} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {books.length === 0 && (
           <motion.div
