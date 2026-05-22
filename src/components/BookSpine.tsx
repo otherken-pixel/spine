@@ -148,6 +148,23 @@ export function BookSpine({ book, onClick, index }: Props) {
           boxShadow: '2px 0 6px rgba(0,0,0,0.35)',
         }}
       />
+
+      {/* New release dot — top-right corner of spine */}
+      {book.hasNewRelease && (
+        <div
+          className="absolute"
+          style={{
+            top: 4,
+            right: 6,
+            width: 7,
+            height: 7,
+            borderRadius: '50%',
+            background: '#c4601e',
+            border: '1.5px solid rgba(255,255,255,0.7)',
+            animation: 'pulse 1.8s ease-in-out infinite',
+          }}
+        />
+      )}
     </motion.div>
   )
 }

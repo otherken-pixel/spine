@@ -75,6 +75,24 @@ export function GridView({ books, onSelectBook }: Props) {
                 className="absolute bottom-0 left-0 right-0 h-8"
                 style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.25), transparent)' }}
               />
+              {/* New release indicator */}
+              {book.hasNewRelease && (
+                <div
+                  className="absolute top-2 left-2 flex items-center gap-1 rounded-full px-2 py-0.5"
+                  style={{ background: 'rgba(196,96,30,0.92)', backdropFilter: 'blur(8px)' }}
+                >
+                  <span
+                    className="font-sans font-semibold text-white"
+                    style={{ fontSize: 8, letterSpacing: '0.06em' }}
+                  >
+                    NEW RELEASE
+                  </span>
+                  <span
+                    className="inline-block rounded-full"
+                    style={{ width: 5, height: 5, background: '#fff', animation: 'pulse 1.8s ease-in-out infinite' }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Metadata */}
