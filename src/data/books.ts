@@ -11,6 +11,12 @@ export interface Book {
   coverUrl: string | null
   dominantColor: string
   genre?: string
+  // Feature 2: Reading Map
+  locationTags?: string[]
+  coordinates?: { lat: number; lng: number }
+  // Feature 3: Living Shelf
+  hasNewRelease?: boolean
+  newReleaseTitle?: string
 }
 
 export const SEED_BOOKS: Omit<Book, 'coverUrl' | 'dominantColor'>[] = [

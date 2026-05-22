@@ -16,6 +16,10 @@
   --accent: #c4601e;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Book vibe — overridden per-book when detail is open */
+  --vibe-bg: #1a0f07;
+  --vibe-bg-end: #0d0805;
+  --vibe-accent: #c4601e;
 }
 
 * {
@@ -58,6 +62,16 @@ body {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.25); }
+}
+
+/* Smooth vibe background transition when book detail opens */
+.vibe-transition {
+  transition: background-color 650ms ease;
 }
 
 /* 3D perspective stage */
