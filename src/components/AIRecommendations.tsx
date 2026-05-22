@@ -15,6 +15,21 @@ interface Props {
   geminiKey: string
 }
 
+async function callGemini(prompt: string, apiKey: string, model: string): Promise<Response> {
+  return fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+      }),
+      signal: AbortSignal.timeout(20000),
+    }
+  )
+}
+
 async function fetchRecommendations(books: Book[], apiKey: string): Promise<Recommendation[]> {
   const topRated = [...books]
     .filter((b) => b.rating >= 3)
@@ -41,25 +56,36 @@ Respond ONLY with a valid JSON array in this exact shape — no markdown, no pro
 
 Each "reason" should be one sentence that directly connects the recommendation to a specific pattern in their reading history.`
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
-      }),
-      signal: AbortSignal.timeout(20000),
-    }
-  )
+  // Try lite model first (higher free-tier quota), fall back to flash
+  const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash']
+  const delays = [1000, 2000, 4000]
 
-  if (!res.ok) throw new Error(`Gemini API error ${res.status}`)
-  const data = await res.json()
-  const raw: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-  // Strip any accidental markdown fences
-  const json = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-  return JSON.parse(json) as Recommendation[]
+  let lastError = 'Something went wrong'
+
+  for (const model of models) {
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, delays[attempt - 1]))
+      }
+      const res = await callGemini(prompt, apiKey, model)
+      if (res.ok) {
+        const data = await res.json()
+        const raw: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+        const json = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        return JSON.parse(json) as Recommendation[]
+      }
+      if (res.status === 429) {
+        lastError = 'Rate limit reached — please wait a moment and try again'
+        // keep retrying with backoff
+        continue
+      }
+      // Non-retryable error — break out of retry loop for this model
+      lastError = `Gemini API error ${res.status}`
+      break
+    }
+  }
+
+  throw new Error(lastError)
 }
 
 export function AIRecommendations({ books, geminiKey }: Props) {

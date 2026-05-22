@@ -34,6 +34,30 @@ async function fetchOpenLibraryCover(title: string, author: string): Promise<str
   }
 }
 
+async function fetchGoogleBooksCover(title: string, author: string): Promise<string | null> {
+  try {
+    const q = encodeURIComponent(`intitle:${title} inauthor:${author}`)
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)`,
+      { signal: AbortSignal.timeout(10000) }
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    const thumb: string | undefined = data?.items?.[0]?.volumeInfo?.imageLinks?.thumbnail
+    if (!thumb) return null
+    // Use zoom=2 for a larger image and ensure https
+    return thumb.replace('http://', 'https://').replace('zoom=1', 'zoom=2')
+  } catch {
+    return null
+  }
+}
+
+async function fetchCover(title: string, author: string): Promise<string | null> {
+  const url = await fetchOpenLibraryCover(title, author)
+  if (url) return url
+  return fetchGoogleBooksCover(title, author)
+}
+
 function makeSeedBooks(): Book[] {
   return SEED_BOOKS.map((b) => ({
     ...b,
@@ -65,7 +89,7 @@ export function useBookCovers() {
       const allBooks = [...makeSeedBooks(), ...loadUserBooks()]
       for (const book of allBooks) {
         if (cache[book.id]) continue
-        const url = await fetchOpenLibraryCover(book.title, book.author)
+        const url = await fetchCover(book.title, book.author)
         if (url) {
           cache[book.id] = url
           saveCoversCache(cache)
@@ -106,7 +130,7 @@ export function useBookCovers() {
 
     // If no cover was provided at add time, fetch it async
     if (!book.coverUrl) {
-      fetchOpenLibraryCover(book.title, book.author).then((url) => {
+      fetchCover(book.title, book.author).then((url) => {
         if (url) {
           const cache = loadCoversCache()
           cache[book.id] = url
