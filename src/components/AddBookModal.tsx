@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Book } from '../data/books'
+import { HalfStarRating } from './HalfStarRating'
 
 interface Props {
   visible: boolean
@@ -39,12 +40,14 @@ async function searchOpenLibrary(query: string): Promise<SearchResult[]> {
   }
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const FUZZY_OPTIONS = ['Early', 'Mid', 'Late', 'Spring', 'Summer', 'Autumn', 'Winter', 'Sometime in']
 const now = new Date()
 const YEARS = Array.from({ length: 10 }, (_, i) => now.getFullYear() - i)
 
 type View = 'search' | 'form'
+type DateMode = 'exact' | 'fuzzy' | 'none'
 
 interface FormState {
   title: string
@@ -54,6 +57,8 @@ interface FormState {
   month: number
   year: number
   coverUrl: string | null
+  dateMode: DateMode
+  fuzzyPrefix: string
 }
 
 function defaultForm(): FormState {
@@ -62,29 +67,12 @@ function defaultForm(): FormState {
     author: '',
     synopsis: '',
     rating: 4,
-    month: new Date().getMonth(),
-    year: new Date().getFullYear(),
+    month: now.getMonth(),
+    year: now.getFullYear(),
     coverUrl: null,
+    dateMode: 'exact',
+    fuzzyPrefix: 'Sometime in',
   }
-}
-
-function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="flex gap-2">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <motion.button
-          key={s}
-          type="button"
-          onClick={() => onChange(s)}
-          whileTap={{ scale: 0.85 }}
-          className="text-2xl"
-          style={{ color: s <= value ? '#f59e0b' : 'rgba(255,255,255,0.2)' }}
-        >
-          {s <= value ? '★' : '☆'}
-        </motion.button>
-      ))}
-    </div>
-  )
 }
 
 export function AddBookModal({ visible, onClose, onAdd }: Props) {
@@ -147,13 +135,23 @@ export function AddBookModal({ visible, onClose, onAdd }: Props) {
   function handleSubmit() {
     if (!form.title.trim() || !form.author.trim() || submitting) return
     setSubmitting(true)
+    const fuzzyString = `${form.fuzzyPrefix} ${form.year}`
+    const dateRead =
+      form.dateMode === 'exact'
+        ? `${MONTH_NAMES[form.month]} ${form.year}`
+        : form.dateMode === 'fuzzy'
+        ? fuzzyString
+        : 'Unknown'
     onAdd({
       id: Date.now().toString(),
       title: form.title.trim(),
       author: form.author.trim(),
       synopsis: form.synopsis.trim(),
       rating: form.rating,
-      dateRead: `${MONTH_NAMES[form.month]} ${form.year}`,
+      dateRead,
+      dateReadType: form.dateMode,
+      dateReadExact: form.dateMode === 'exact' ? `${form.year}-${String(form.month + 1).padStart(2, '0')}-01` : undefined,
+      dateReadFuzzy: form.dateMode === 'fuzzy' ? fuzzyString : undefined,
       coverUrl: form.coverUrl,
       dominantColor: '#5a3e2b',
     })
@@ -404,35 +402,93 @@ export function AddBookModal({ visible, onClose, onAdd }: Props) {
 
                       {/* Rating */}
                       <div>
-                        <label className="text-white/40 font-sans text-xs uppercase tracking-wider block mb-2">Rating</label>
-                        <StarPicker value={form.rating} onChange={(v) => setForm((p) => ({ ...p, rating: v }))} />
+                        <label className="text-white/40 font-sans text-xs uppercase tracking-wider block mb-2">
+                          Rating — {form.rating.toFixed(1)} ★
+                        </label>
+                        <HalfStarRating
+                          value={form.rating}
+                          onChange={(v) => setForm((p) => ({ ...p, rating: v }))}
+                          size={28}
+                          color="#f59e0b"
+                        />
                       </div>
 
                       {/* Date Read */}
                       <div>
                         <label className="text-white/40 font-sans text-xs uppercase tracking-wider block mb-1.5">Date Read</label>
-                        <div className="flex gap-2">
-                          <select
-                            value={form.month}
-                            onChange={(e) => setForm((p) => ({ ...p, month: parseInt(e.target.value) }))}
-                            className="flex-1 rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
-                            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
-                          >
-                            {MONTHS.map((m, i) => (
-                              <option key={m} value={i} style={{ background: '#160e07' }}>{m}</option>
-                            ))}
-                          </select>
-                          <select
-                            value={form.year}
-                            onChange={(e) => setForm((p) => ({ ...p, year: parseInt(e.target.value) }))}
-                            className="rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
-                            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', minWidth: 80 }}
-                          >
-                            {YEARS.map((y) => (
-                              <option key={y} value={y} style={{ background: '#160e07' }}>{y}</option>
-                            ))}
-                          </select>
+
+                        {/* Mode tabs */}
+                        <div className="flex gap-1 mb-2 rounded-xl p-0.5" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          {(['exact', 'fuzzy', 'none'] as DateMode[]).map((m) => (
+                            <button
+                              key={m}
+                              type="button"
+                              onClick={() => setForm((p) => ({ ...p, dateMode: m }))}
+                              className="flex-1 rounded-lg py-1.5 font-sans capitalize transition-all"
+                              style={{
+                                fontSize: 12,
+                                background: form.dateMode === m ? 'rgba(255,255,255,0.15)' : 'transparent',
+                                color: form.dateMode === m ? '#fff' : 'rgba(255,255,255,0.35)',
+                              }}
+                            >
+                              {m === 'none' ? 'Unknown' : m}
+                            </button>
+                          ))}
                         </div>
+
+                        {form.dateMode === 'exact' && (
+                          <div className="flex gap-2">
+                            <select
+                              value={form.month}
+                              onChange={(e) => setForm((p) => ({ ...p, month: parseInt(e.target.value) }))}
+                              className="flex-1 rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
+                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+                            >
+                              {MONTHS_SHORT.map((m, i) => (
+                                <option key={m} value={i} style={{ background: '#160e07' }}>{m}</option>
+                              ))}
+                            </select>
+                            <select
+                              value={form.year}
+                              onChange={(e) => setForm((p) => ({ ...p, year: parseInt(e.target.value) }))}
+                              className="rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
+                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', minWidth: 80 }}
+                            >
+                              {YEARS.map((y) => (
+                                <option key={y} value={y} style={{ background: '#160e07' }}>{y}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {form.dateMode === 'fuzzy' && (
+                          <div className="flex gap-2">
+                            <select
+                              value={form.fuzzyPrefix}
+                              onChange={(e) => setForm((p) => ({ ...p, fuzzyPrefix: e.target.value }))}
+                              className="flex-1 rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
+                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+                            >
+                              {FUZZY_OPTIONS.map((o) => (
+                                <option key={o} value={o} style={{ background: '#160e07' }}>{o}</option>
+                              ))}
+                            </select>
+                            <select
+                              value={form.year}
+                              onChange={(e) => setForm((p) => ({ ...p, year: parseInt(e.target.value) }))}
+                              className="rounded-xl px-3 py-3 font-sans text-sm text-white outline-none appearance-none"
+                              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', minWidth: 80 }}
+                            >
+                              {YEARS.map((y) => (
+                                <option key={y} value={y} style={{ background: '#160e07' }}>{y}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {form.dateMode === 'none' && (
+                          <p className="text-white/30 font-sans text-xs py-2">Date won't be recorded</p>
+                        )}
                       </div>
 
                       {/* Synopsis */}

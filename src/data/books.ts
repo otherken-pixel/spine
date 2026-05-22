@@ -3,10 +3,14 @@ export interface Book {
   title: string
   author: string
   synopsis: string
-  rating: number
-  dateRead: string
+  rating: number           // 0.5–5.0 increments (half-star)
+  dateRead: string         // legacy display string
+  dateReadType?: 'exact' | 'fuzzy' | 'none'
+  dateReadExact?: string   // ISO "YYYY-MM-DD"
+  dateReadFuzzy?: string   // e.g. "Sometime in 2026"
   coverUrl: string | null
   dominantColor: string
+  genre?: string
 }
 
 export const SEED_BOOKS: Omit<Book, 'coverUrl' | 'dominantColor'>[] = [

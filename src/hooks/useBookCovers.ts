@@ -79,6 +79,17 @@ export function useBookCovers() {
     fetchMissing()
   }, [])
 
+  const updateBook = useCallback((id: string, patch: Partial<Book>) => {
+    setBooks((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)))
+    // Persist if it's a user book
+    const userBooks = loadUserBooks()
+    const idx = userBooks.findIndex((b) => b.id === id)
+    if (idx !== -1) {
+      userBooks[idx] = { ...userBooks[idx], ...patch }
+      saveUserBooks(userBooks)
+    }
+  }, [])
+
   const addBook = useCallback((book: Book) => {
     // Persist to user books store
     const userBooks = loadUserBooks()
@@ -106,5 +117,5 @@ export function useBookCovers() {
     }
   }, [])
 
-  return { books, addBook }
+  return { books, addBook, updateBook }
 }
