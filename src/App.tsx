@@ -28,7 +28,7 @@ export default function App() {
   const [showThemePicker, setShowThemePicker] = useState(false)
   const [showAddBook, setShowAddBook] = useState(false)
   const [showEras, setShowEras] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('shelf')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   // Feature 3: watch authors for new releases
   useAuthorWatcher(books, updateBook)
@@ -70,12 +70,16 @@ export default function App() {
         }}
       />
 
-      {/* ── Header ── */}
+      {/* ── Header — gradient background masks scrolling content ── */}
       <motion.div
         className="absolute top-0 left-0 right-0 z-20"
         animate={{ opacity: bookOpen ? 0 : 1, y: bookOpen ? -8 : 0 }}
         transition={{ duration: 0.22 }}
-        style={{ pointerEvents: bookOpen ? 'none' : 'auto' }}
+        style={{
+          pointerEvents: bookOpen ? 'none' : 'auto',
+          paddingBottom: 20,
+          background: `linear-gradient(to bottom, ${theme.roomBg} 0%, ${theme.roomBg} 78%, ${theme.roomBg}00 100%)`,
+        }}
       >
         <div
           className="flex items-center justify-between px-5"
@@ -186,7 +190,7 @@ export default function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
-              style={{ paddingTop: goal ? 164 : 128 }}
+              style={{ paddingTop: 'calc(var(--safe-top) + 164px)' }}
             >
               <Bookshelf books={books} onSelectBook={setSelectedBook} />
             </motion.div>
