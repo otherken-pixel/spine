@@ -17,14 +17,38 @@ const SPINE_COLORS = [
 function getSpineColor(id: string): string {
   const n = parseInt(id)
   if (!isNaN(n) && n >= 1 && n <= 10) return SPINE_COLORS[n - 1]
-  // Hash string IDs (user-added books) to a consistent color
   let hash = 0
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0
   return SPINE_COLORS[hash % SPINE_COLORS.length]
 }
 
+// Strip leading articles so the meaningful part of the title has maximum room.
+// "The Five Star Weekend" → "Five Star Weekend" saves 4 chars.
+function formatTitle(title: string): string {
+  return title.replace(/^(The|A|An)\s+/i, '').trim()
+}
+
+// In writing-mode: vertical-rl, each Latin character contributes its advance
+// width (~0.55 em) to the column height. Pick a font size so the title fits
+// within the ~108 px of available spine height.
+function titleFontSize(text: string): number {
+  const n = text.length
+  if (n <= 8)  return 12
+  if (n <= 12) return 11
+  if (n <= 17) return 10
+  return 9
+}
+
+function authorSurname(author: string): string {
+  const parts = author.trim().split(/\s+/)
+  return parts[parts.length - 1]
+}
+
 export function BookSpine({ book, onClick, index }: Props) {
-  const spineColor = getSpineColor(book.id)
+  const color        = getSpineColor(book.id)
+  const displayTitle = formatTitle(book.title)
+  const fontSize     = titleFontSize(displayTitle)
+  const surname      = authorSurname(book.author)
 
   return (
     <motion.div
@@ -37,32 +61,76 @@ export function BookSpine({ book, onClick, index }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{
         opacity: { delay: index * 0.05, duration: 0.4 },
-        y: { delay: index * 0.05, duration: 0.4 },
-        layout: { type: 'spring', stiffness: 300, damping: 30 },
+        y:       { delay: index * 0.05, duration: 0.4 },
+        layout:  { type: 'spring', stiffness: 300, damping: 30 },
       }}
     >
-      {/* Spine body */}
+      {/* ── Spine body ── */}
       <div
         className="absolute inset-0 rounded-sm overflow-hidden"
         style={{
-          background: `linear-gradient(160deg, ${spineColor}f0 0%, ${spineColor} 50%, ${spineColor}cc 100%)`,
+          background: `linear-gradient(160deg, ${color}f0 0%, ${color} 50%, ${color}cc 100%)`,
           boxShadow: '3px 0 10px rgba(0,0,0,0.5), inset 2px 0 4px rgba(255,255,255,0.1), inset -1px 0 2px rgba(0,0,0,0.3)',
         }}
       >
-        {/* Edge gradients for depth */}
+        {/* Depth gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-transparent to-black/20 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-transparent to-black/15 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/15 pointer-events-none" />
 
-        {/* Title — vertical writing */}
+        {/* Top accent line */}
         <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+          className="absolute pointer-events-none"
+          style={{ top: 9, left: 6, right: 5, height: 1, background: 'rgba(255,255,255,0.38)' }}
+        />
+
+        {/* ── Title ──
+            The container uses normal flex layout (no writing-mode) so CSS
+            dimensions mean what they say in screen coordinates.
+            The span inside carries writing-mode: vertical-rl, making it
+            narrow (~fontSize px wide) and tall (~text-length × advance-width px).
+            Flex centers the span within the container both axes. */}
+        <div
+          className="absolute flex items-center justify-center overflow-hidden"
+          style={{ top: 14, left: 3, right: 4, bottom: 58 }}
         >
           <span
-            className="relative z-10 text-white font-serif font-semibold leading-none text-center px-1 line-clamp-1"
-            style={{ fontSize: 10, letterSpacing: '0.06em', maxHeight: '160px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            className="text-white font-serif font-semibold"
+            style={{
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              fontSize,
+              letterSpacing: '0.045em',
+              lineHeight: 1,
+            }}
           >
-            {book.title}
+            {displayTitle}
+          </span>
+        </div>
+
+        {/* Separator line between title and author */}
+        <div
+          className="absolute pointer-events-none"
+          style={{ bottom: 54, left: 7, right: 6, height: 1, background: 'rgba(255,255,255,0.18)' }}
+        />
+
+        {/* ── Author surname ──
+            Same centering trick: container in normal flow, span in vertical-rl. */}
+        <div
+          className="absolute flex items-center justify-center overflow-hidden"
+          style={{ bottom: 5, left: 3, right: 4, height: 46 }}
+        >
+          <span
+            className="font-sans font-medium"
+            style={{
+              writingMode: 'vertical-rl',
+              textOrientation: 'mixed',
+              fontSize: 7,
+              letterSpacing: '0.10em',
+              lineHeight: 1,
+              color: 'rgba(255,255,255,0.55)',
+            }}
+          >
+            {surname}
           </span>
         </div>
 
