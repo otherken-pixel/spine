@@ -12,7 +12,11 @@ export interface Theme {
   roomBg: string
   roomBgEnd: string
   blurIntensity: string
-  customAccent?: string
+  accent: string
+  textColor: string
+  textSecondary: string
+  buttonBg: string
+  buttonBorder: string
 }
 
 export const THEMES: Record<ThemeId, Theme> = {
@@ -26,7 +30,11 @@ export const THEMES: Record<ThemeId, Theme> = {
     roomBg: '#1a0f07',
     roomBgEnd: '#0d0805',
     blurIntensity: '20px',
-    customAccent: '#c4601e',
+    accent: '#c4601e',
+    textColor: '#ffffff',
+    textSecondary: 'rgba(255,255,255,0.45)',
+    buttonBg: 'rgba(255,255,255,0.09)',
+    buttonBorder: 'rgba(255,255,255,0.14)',
   },
   minimalist: {
     id: 'minimalist',
@@ -35,10 +43,14 @@ export const THEMES: Record<ThemeId, Theme> = {
     shelfPlankColor: '#c8c8c8',
     shelfPlankBorder: '#b0b0b0',
     shelfShadow: '0 4px 20px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)',
-    roomBg: '#f5f5f0',
-    roomBgEnd: '#ebebeb',
+    roomBg: '#f0ede8',
+    roomBgEnd: '#e8e4de',
     blurIntensity: '12px',
-    customAccent: '#333333',
+    accent: '#4a4a4a',
+    textColor: '#1a1a1a',
+    textSecondary: 'rgba(0,0,0,0.45)',
+    buttonBg: 'rgba(0,0,0,0.07)',
+    buttonBorder: 'rgba(0,0,0,0.14)',
   },
   custom: {
     id: 'custom',
@@ -50,7 +62,11 @@ export const THEMES: Record<ThemeId, Theme> = {
     roomBg: '#0d1520',
     roomBgEnd: '#070d14',
     blurIntensity: '16px',
-    customAccent: '#3b82f6',
+    accent: '#3b82f6',
+    textColor: '#ffffff',
+    textSecondary: 'rgba(255,255,255,0.45)',
+    buttonBg: 'rgba(255,255,255,0.09)',
+    buttonBorder: 'rgba(255,255,255,0.14)',
   },
 }
 
@@ -73,7 +89,10 @@ interface Stored {
 function loadStored(): Stored {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as Stored
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Stored>
+      if (parsed.themeId && parsed.customColors) return parsed as Stored
+    }
   } catch {}
   return {
     themeId: 'mahogany',
@@ -104,7 +123,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           roomBg: customColors.room,
           roomBgEnd: customColors.room,
           shelfPlankColor: customColors.plank,
-          customAccent: customColors.accent,
+          accent: customColors.accent,
         }
       : base
 
@@ -112,7 +131,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.setProperty('--room-bg', theme.roomBg)
     document.documentElement.style.setProperty('--room-bg-end', theme.roomBgEnd)
     document.documentElement.style.setProperty('--blur-intensity', theme.blurIntensity)
-    document.documentElement.style.setProperty('--accent', theme.customAccent ?? '#c4601e')
+    document.documentElement.style.setProperty('--accent', theme.accent)
   }, [theme])
 
   return createElement(ThemeContext.Provider, { value: { theme, setThemeId, customColors, setCustomColors } }, children)
