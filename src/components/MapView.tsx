@@ -72,7 +72,7 @@ export function MapView({ books, onSelectBook }: Props) {
   const mappedBooks = books.filter((b) => b.coordinates)
 
   return (
-    <div className="absolute inset-0" style={{ paddingTop: 'calc(var(--safe-top) + 80px)' }}>
+    <div className="absolute inset-0" style={{ paddingTop: 'calc(var(--safe-top) + 164px)' }}>
       {mappedBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" opacity={0.3}>
