@@ -12,19 +12,19 @@ export function GridView({ books, onSelectBook }: Props) {
   const { theme } = useTheme()
   const dark = theme.id !== 'minimalist'
 
-  const cardBg = dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.95)'
+  const cardBg = dark ? 'rgba(255,255,255,0.05)' : '#ffffff'
   const cardShadow = dark
     ? '0 6px 28px rgba(0,0,0,0.45), 0 1px 6px rgba(0,0,0,0.3)'
-    : '0 4px 24px rgba(0,0,0,0.07), 0 1px 6px rgba(0,0,0,0.04)'
+    : '0 4px 20px rgba(0,0,0,0.10), 0 1px 5px rgba(0,0,0,0.07)'
   const hoverShadow = dark
     ? '0 16px 48px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4)'
-    : '0 16px 48px rgba(0,0,0,0.13), 0 4px 12px rgba(0,0,0,0.07)'
+    : '0 16px 48px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.09)'
 
   return (
     <div
       className="h-full overflow-y-auto"
       style={{
-        paddingTop: 'calc(var(--safe-top) + 80px)',
+        paddingTop: 'calc(var(--safe-top) + 164px)',
         paddingBottom: 'calc(var(--safe-bottom) + 100px)',
       }}
     >

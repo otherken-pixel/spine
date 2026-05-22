@@ -8,7 +8,7 @@ interface Props {
   onSetGoal: (n: number) => void
 }
 
-const R = 30
+const R = 18
 const CIRC = 2 * Math.PI * R
 
 export function ReadingGoalWidget({ booksRead, goal, onSetGoal }: Props) {
@@ -19,10 +19,16 @@ export function ReadingGoalWidget({ booksRead, goal, onSetGoal }: Props) {
   const progress = goal > 0 ? Math.min(booksRead / goal, 1) : 0
   const remaining = Math.max(0, goal - booksRead)
   const complete = goal > 0 && booksRead >= goal
+  const year = new Date().getFullYear()
 
-  const cardBg = theme.id === 'minimalist' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)'
-  const cardBorder = theme.id === 'minimalist' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'
-  const ringTrack = theme.id === 'minimalist' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)'
+  const dark = theme.id !== 'minimalist'
+  const cardBg = dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.88)'
+  const cardBorder = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.09)'
+  const cardShadow = dark
+    ? 'inset 0 1px 0 rgba(255,255,255,0.07), 0 2px 8px rgba(0,0,0,0.25)'
+    : '0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04)'
+  const subduedBg = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)'
+  const ringTrack = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.09)'
   const ringFill = complete ? '#22c55e' : theme.accent
 
   function commitGoal() {
@@ -32,122 +38,133 @@ export function ReadingGoalWidget({ booksRead, goal, onSetGoal }: Props) {
     setDraft('')
   }
 
-  if (!goal) {
-    return (
+  return (
+    <>
       <motion.div
-        className="mx-5 rounded-2xl px-4 py-3 flex items-center gap-3"
-        style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
+        className="mx-4 rounded-2xl overflow-hidden"
+        style={{
+          background: cardBg,
+          border: `1px solid ${cardBorder}`,
+          borderTop: `1.5px solid ${theme.accent}55`,
+          boxShadow: cardShadow,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
+        transition={{ delay: 0.12, type: 'spring', stiffness: 320, damping: 30 }}
       >
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <circle cx="9" cy="9" r="7" stroke={theme.textSecondary} strokeWidth="1.5" strokeDasharray="3 2" />
-          <path d="M9 5v4l2.5 2.5" stroke={theme.textSecondary} strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
-        <span className="font-sans text-sm flex-1" style={{ color: theme.textSecondary }}>
-          Set a reading goal for {new Date().getFullYear()}
-        </span>
-        <motion.button
-          onClick={() => setEditing(true)}
-          className="rounded-xl px-3 py-1.5 font-sans text-xs font-semibold"
-          style={{ background: theme.accent, color: '#fff' }}
-          whileTap={{ scale: 0.94 }}
-        >
-          Set Goal
-        </motion.button>
+        {!goal ? (
+          // ── No goal state ──────────────────────────────────────
+          <div className="flex items-center gap-3 px-4 py-4">
+            <div
+              className="flex-shrink-0 flex items-center justify-center rounded-xl"
+              style={{ width: 40, height: 40, background: subduedBg, border: `1px solid ${cardBorder}` }}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="8" stroke={theme.accent} strokeWidth="1.5" strokeDasharray="3.5 2.5" />
+                <path d="M10 6v4.5l3 1.5" stroke={theme.accent} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-serif font-semibold leading-tight" style={{ fontSize: 14, color: theme.textColor }}>
+                {year} Reading Goal
+              </p>
+              <p className="font-sans mt-0.5 leading-tight" style={{ fontSize: 11, color: theme.textSecondary }}>
+                How many books will you read this year?
+              </p>
+            </div>
+            <motion.button
+              onClick={() => { setDraft(''); setEditing(true) }}
+              className="flex-shrink-0 flex items-center gap-1 rounded-xl px-3 py-2 font-sans text-xs font-semibold text-white"
+              style={{ background: theme.accent, whiteSpace: 'nowrap' }}
+              whileTap={{ scale: 0.94 }}
+            >
+              Set Goal
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2.5 5h5M5 2.5l2.5 2.5L5 7.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </motion.button>
+          </div>
+        ) : (
+          // ── Goal set state ─────────────────────────────────────
+          <div className="flex items-center gap-3 px-4 py-3">
+            {/* Compact progress ring */}
+            <div className="relative flex-shrink-0" style={{ width: 46, height: 46 }}>
+              <svg width="46" height="46" viewBox="0 0 46 46" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="23" cy="23" r={R} fill="none" stroke={ringTrack} strokeWidth="4" />
+                <motion.circle
+                  cx="23" cy="23" r={R}
+                  fill="none"
+                  stroke={ringFill}
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={CIRC}
+                  initial={{ strokeDashoffset: CIRC }}
+                  animate={{ strokeDashoffset: CIRC - CIRC * progress }}
+                  transition={{ duration: 1.1, ease: [0.34, 1.56, 0.64, 1], delay: 0.2 }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                <motion.span
+                  className="font-sans font-bold leading-none"
+                  style={{ fontSize: complete ? 11 : 14, color: complete ? '#22c55e' : theme.textColor }}
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.35, type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  {complete ? '✓' : booksRead}
+                </motion.span>
+                <span className="font-sans leading-none" style={{ fontSize: 8, color: theme.textSecondary }}>
+                  /{goal}
+                </span>
+              </div>
+            </div>
 
-        <AnimatePresence>
-          {editing && (
-            <GoalInputOverlay
-              draft={draft}
-              onChange={setDraft}
-              onCommit={commitGoal}
-              onCancel={() => { setEditing(false); setDraft('') }}
-              theme={theme}
-            />
-          )}
-        </AnimatePresence>
+            {/* Stats + progress bar */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-1.5 mb-1.5">
+                <span className="font-serif font-semibold leading-none" style={{ fontSize: 15, color: theme.textColor }}>
+                  {complete ? '🎉 Goal reached!' : `${booksRead} of ${goal} books`}
+                </span>
+                <span className="font-sans" style={{ fontSize: 11, color: theme.textSecondary }}>
+                  · {Math.round(progress * 100)}%
+                </span>
+              </div>
+              {/* Progress bar */}
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: ringTrack }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: ringFill }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(progress * 100, 100)}%` }}
+                  transition={{ duration: 1.0, ease: 'easeOut', delay: 0.25 }}
+                />
+              </div>
+              <p className="font-sans mt-1 leading-none" style={{ fontSize: 10.5, color: theme.textSecondary }}>
+                {complete
+                  ? `${year} reading goal`
+                  : `${remaining} book${remaining !== 1 ? 's' : ''} to go · ${year}`}
+              </p>
+            </div>
+
+            {/* Edit button */}
+            <motion.button
+              onClick={() => { setDraft(String(goal)); setEditing(true) }}
+              className="flex-shrink-0 rounded-xl p-2.5"
+              style={{ background: subduedBg, border: `1px solid ${cardBorder}` }}
+              whileTap={{ scale: 0.9 }}
+              title="Edit goal"
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M9 2L11 4L4.5 10.5H2.5V8.5L9 2Z"
+                  stroke={theme.textSecondary} strokeWidth="1.2"
+                  strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </motion.button>
+          </div>
+        )}
       </motion.div>
-    )
-  }
-
-  return (
-    <motion.div
-      className="mx-5 rounded-2xl px-4 py-3 flex items-center gap-4"
-      style={{ background: cardBg, border: `1px solid ${cardBorder}` }}
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-    >
-      {/* Animated ring */}
-      <div className="relative flex-shrink-0" style={{ width: 72, height: 72 }}>
-        <svg width="72" height="72" viewBox="0 0 72 72" style={{ transform: 'rotate(-90deg)' }}>
-          {/* Track */}
-          <circle cx="36" cy="36" r={R} fill="none" stroke={ringTrack} strokeWidth="5" />
-          {/* Progress arc */}
-          <motion.circle
-            cx="36"
-            cy="36"
-            r={R}
-            fill="none"
-            stroke={ringFill}
-            strokeWidth="5"
-            strokeLinecap="round"
-            strokeDasharray={CIRC}
-            initial={{ strokeDashoffset: CIRC }}
-            animate={{ strokeDashoffset: CIRC - CIRC * progress }}
-            transition={{ duration: 1.2, ease: [0.34, 1.56, 0.64, 1], delay: 0.25 }}
-          />
-        </svg>
-        {/* Center label */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.span
-            className="font-serif font-bold leading-none"
-            style={{ fontSize: 18, color: complete ? '#22c55e' : theme.textColor }}
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 400, damping: 20 }}
-          >
-            {booksRead}
-          </motion.span>
-          <span className="font-sans" style={{ fontSize: 9, color: theme.textSecondary, marginTop: 1 }}>
-            of {goal}
-          </span>
-        </div>
-      </div>
-
-      {/* Text info */}
-      <div className="flex-1 min-w-0">
-        <p className="font-serif font-semibold leading-tight mb-0.5" style={{ fontSize: 15, color: theme.textColor }}>
-          {complete ? '🎉 Goal complete!' : `${remaining} book${remaining !== 1 ? 's' : ''} to go`}
-        </p>
-        <p className="font-sans" style={{ fontSize: 12, color: theme.textSecondary }}>
-          {new Date().getFullYear()} reading goal · {Math.round(progress * 100)}%
-        </p>
-        <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: ringTrack, maxWidth: 120 }}>
-          <motion.div
-            className="h-full rounded-full"
-            style={{ background: ringFill }}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress * 100}%` }}
-            transition={{ duration: 1.1, ease: 'easeOut', delay: 0.3 }}
-          />
-        </div>
-      </div>
-
-      {/* Edit button */}
-      <motion.button
-        onClick={() => { setDraft(String(goal)); setEditing(true) }}
-        className="flex-shrink-0 rounded-xl px-2.5 py-2"
-        style={{ background: 'transparent', border: `1px solid ${cardBorder}` }}
-        whileTap={{ scale: 0.9 }}
-        title="Edit goal"
-      >
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M9 2L11 4L4.5 10.5H2.5V8.5L9 2Z" stroke={theme.textSecondary} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </motion.button>
 
       <AnimatePresence>
         {editing && (
@@ -160,12 +177,12 @@ export function ReadingGoalWidget({ booksRead, goal, onSetGoal }: Props) {
           />
         )}
       </AnimatePresence>
-    </motion.div>
+    </>
   )
 }
 
 function GoalInputOverlay({
-  draft, onChange, onCommit, onCancel, theme
+  draft, onChange, onCommit, onCancel, theme,
 }: {
   draft: string
   onChange: (v: string) => void
@@ -173,31 +190,40 @@ function GoalInputOverlay({
   onCancel: () => void
   theme: import('../store/themeStore').Theme
 }) {
+  const year = new Date().getFullYear()
   return (
     <>
+      {/* Full-screen backdrop */}
       <motion.div
         className="fixed inset-0"
-        style={{ zIndex: 55, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        style={{ zIndex: 55, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={onCancel}
       />
+      {/* Dialog — properly centered via Framer Motion x/y transforms */}
       <motion.div
-        className="fixed left-1/2 rounded-2xl p-5 flex flex-col gap-4"
+        className="fixed flex flex-col gap-4"
         style={{
-          zIndex: 56, top: '40%', transform: 'translate(-50%, -50%)',
-          width: 260,
-          background: theme.id === 'minimalist' ? '#f5f2ed' : '#1a1208',
-          border: `1px solid ${theme.id === 'minimalist' ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)'}`,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+          zIndex: 56,
+          top: '50%',
+          left: '50%',
+          width: 'min(280px, calc(100vw - 40px))',
+          padding: 20,
+          borderRadius: 20,
+          background: theme.id === 'minimalist' ? '#f5f2ed' : '#1c1208',
+          border: `1px solid ${theme.id === 'minimalist' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'}`,
+          boxShadow: '0 28px 70px rgba(0,0,0,0.55)',
         }}
-        initial={{ opacity: 0, scale: 0.92, y: '-48%' }}
-        animate={{ opacity: 1, scale: 1, y: '-50%' }}
-        exit={{ opacity: 0, scale: 0.92, y: '-48%' }}
+        initial={{ opacity: 0, scale: 0.9, x: '-50%', y: '-46%' }}
+        animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+        exit={{ opacity: 0, scale: 0.9, x: '-50%', y: '-46%' }}
         transition={{ type: 'spring', stiffness: 400, damping: 28 }}
         onClick={(e) => e.stopPropagation()}
       >
         <p className="font-serif font-semibold text-center" style={{ fontSize: 17, color: theme.textColor }}>
-          Books to read in {new Date().getFullYear()}
+          Books to read in {year}
         </p>
         <input
           autoFocus
@@ -218,14 +244,14 @@ function GoalInputOverlay({
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-xl py-2.5 font-sans text-sm"
+            className="flex-1 rounded-xl py-3 font-sans text-sm font-medium"
             style={{ background: theme.buttonBg, color: theme.textSecondary, border: `1px solid ${theme.buttonBorder}` }}
           >
             Cancel
           </button>
           <motion.button
             onClick={onCommit}
-            className="flex-1 rounded-xl py-2.5 font-sans text-sm font-semibold text-white"
+            className="flex-1 rounded-xl py-3 font-sans text-sm font-semibold text-white"
             style={{ background: theme.accent }}
             whileTap={{ scale: 0.96 }}
           >
