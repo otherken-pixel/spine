@@ -279,7 +279,7 @@ export default function App() {
 
       {/* ── Bottom action bar ── */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 flex justify-center gap-3"
+        className="fixed bottom-0 left-0 right-0 flex justify-center gap-3"
         style={{ paddingBottom: 'calc(var(--safe-bottom) + 22px)', zIndex: 20, pointerEvents: bookOpen ? 'none' : 'auto' }}
         animate={{ opacity: bookOpen ? 0 : 1, y: bookOpen ? 10 : 0 }}
         transition={{ duration: 0.22 }}
