@@ -5,7 +5,6 @@ import { useReadingGoal } from './hooks/useReadingGoal'
 import { useTheme } from './store/themeStore'
 import { useBookPalette, darkenHex } from './hooks/useBookPalette'
 import { useAuthorWatcher } from './hooks/useAuthorWatcher'
-import { Bookshelf } from './components/Bookshelf'
 import { GridView } from './components/GridView'
 import { MapView } from './components/MapView'
 import { BookDetail } from './components/BookDetail'
@@ -18,7 +17,7 @@ import { Book } from './data/books'
 
 const GEMINI_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) ?? ''
 
-type ViewMode = 'shelf' | 'grid' | 'map'
+type ViewMode = 'grid' | 'map'
 
 export default function App() {
   const { books, addBook, updateBook } = useBookCovers()
@@ -98,12 +97,12 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* View toggle: shelf / grid / map */}
+            {/* View toggle: grid / map */}
             <div
               className="flex items-center rounded-2xl p-1"
               style={{ background: theme.buttonBg, border: `1px solid ${theme.buttonBorder}` }}
             >
-              {(['shelf', 'grid', 'map'] as ViewMode[]).map((v) => (
+              {(['grid', 'map'] as ViewMode[]).map((v) => (
                 <motion.button
                   key={v}
                   onClick={() => setViewMode(v)}
@@ -117,17 +116,6 @@ export default function App() {
                   }}
                   whileTap={{ scale: 0.93 }}
                 >
-                  {v === 'shelf' && (
-                    <span className="flex items-center gap-1">
-                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                        <rect x="1" y="8" width="11" height="2" rx="1" fill="currentColor" />
-                        <rect x="2" y="3" width="2" height="5" rx="0.5" fill="currentColor" opacity="0.6" />
-                        <rect x="5.5" y="2" width="2" height="6" rx="0.5" fill="currentColor" opacity="0.6" />
-                        <rect x="9" y="4" width="2" height="4" rx="0.5" fill="currentColor" opacity="0.6" />
-                      </svg>
-                      Shelf
-                    </span>
-                  )}
                   {v === 'grid' && (
                     <span className="flex items-center gap-1">
                       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -182,19 +170,6 @@ export default function App() {
         style={{ pointerEvents: bookOpen ? 'none' : 'auto' }}
       >
         <AnimatePresence mode="wait" initial={false}>
-          {viewMode === 'shelf' && (
-            <motion.div
-              key="shelf"
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              style={{ paddingTop: 'calc(var(--safe-top) + 164px)' }}
-            >
-              <Bookshelf books={books} onSelectBook={setSelectedBook} />
-            </motion.div>
-          )}
           {viewMode === 'grid' && (
             <motion.div
               key="grid"
